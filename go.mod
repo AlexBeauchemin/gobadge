@@ -1,4 +1,4 @@
-module github.com/AlexBeauchemin/go-coverage-badge
+module github.com/AlexBeauchemin/gobadge
 
 go 1.13
 
