@@ -11,16 +11,23 @@ import (
 )
 
 func main() {
+	var coverage string
 	filename := flag.String("filename", "output.out", "File containing the tests output")
 	label := flag.String("text", "Coverage", "Text on the left side of the badge")
 	yellowThreshold := flag.Int("yellow", 30, "At what percentage does the badge becomes yellow instead of red")
 	greenThreshold := flag.Int("green", 70, "At what percentage does the badge becomes green instead of yellow")
 	color := flag.String("color", "", "Color of the badge - green/yellow/red")
 	target := flag.String("target", "README.md", "Target file")
+	value := flag.String("value", "", "Text on the right side of the badge")
 
 	flag.Parse()
 
-	coverage := retrieveTotalCoverage(*filename)
+	if *value != "" {
+		coverage = *value
+	} else {
+		coverage = retrieveTotalCoverage(*filename)
+	}
+
 	badgeColor := setColor(coverage, *yellowThreshold, *greenThreshold, *color)
 	updateReadme(*target, coverage, *label, badgeColor)
 }
