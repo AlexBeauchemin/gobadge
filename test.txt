@@ -1,5 +1,0 @@
-github.com/AlexBeauchemin/go-coverage-badge/gobadge.go:13:	main			0.0%
-github.com/AlexBeauchemin/go-coverage-badge/gobadge.go:28:	setColor		100.0%
-github.com/AlexBeauchemin/go-coverage-badge/gobadge.go:36:	retrieveTotalCoverage	87.5%
-github.com/AlexBeauchemin/go-coverage-badge/gobadge.go:53:	updateReadme		80.0%
-total:                                                          (statements)            33.3%
