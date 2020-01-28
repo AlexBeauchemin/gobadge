@@ -46,3 +46,9 @@ gobadge -label="Go Coverage" -value=55.6% -color=blue -target=OTHER_README.md
 gobadge -yellow=60 -green=80
 gobadge -color=ff69b4
 ```
+
+## TODO
+
+- Add a silent mode with no output to console/stdout
+- Allow to specify a line number in the target file for badge creation
+- Allow to specify a template to look for in the target file for badge creation
