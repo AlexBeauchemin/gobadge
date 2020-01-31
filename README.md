@@ -12,7 +12,7 @@ go get github.com/AlexBeauchemin/gobadge
 ```
 Make sure you generate a coverage file with your total coverage, something like
 ```go
-go test ./... -covermode=count -coverprofile=coverage.out fmt &&
+go test ./... -covermode=count -coverprofile=coverage.out fmt
 go tool cover -func=coverage.out -o=coverage.out
 ```
 
