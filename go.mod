@@ -1,4 +1,4 @@
-module github.com/AlexBeauchemin/gobadge
+module github.com/acidjazz/gobadge
 
 go 1.13
 
