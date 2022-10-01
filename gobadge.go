@@ -13,14 +13,15 @@ import (
 
 type Threshold struct {
 	yellow int
-	green int
+	green  int
 }
 
 type Params struct {
-	label string
+	label     string
 	threshold Threshold
-	color string
-	value string
+	color     string
+	value     string
+	link      string
 }
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 	color := flag.String("color", "", "Color of the badge - green/yellow/red")
 	target := flag.String("target", "README.md", "Target file")
 	value := flag.String("value", "", "Text on the right side of the badge")
+	link := flag.String("link", "", "Link the badge goes to")
 
 	flag.Parse()
 
@@ -39,11 +41,14 @@ func main() {
 		Threshold{*yellowThreshold, *greenThreshold},
 		*color,
 		*value,
+		*link,
 	}
 
 	err := generateBadge(*source, *target, params)
 
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func generateBadge(source string, target string, params *Params) error {
@@ -56,12 +61,16 @@ func generateBadge(source string, target string, params *Params) error {
 		coverage, err = retrieveTotalCoverage(source)
 	}
 
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	badgeColor := setColor(coverage, params.threshold.yellow, params.threshold.green, params.color)
-	err = updateReadme(target, coverage, params.label, badgeColor)
+	err = updateReadme(target, coverage, params.label, badgeColor, params.link)
 
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("\033[0;36mGoBadge: Coverage badge updated to " + coverage + " in " + target + "\033[0m")
 
@@ -70,9 +79,15 @@ func generateBadge(source string, target string, params *Params) error {
 
 func setColor(coverage string, yellowThreshold int, greenThreshold int, color string) string {
 	coverageNumber, _ := strconv.ParseFloat(strings.Replace(coverage, "%", "", 1), 4)
-	if color != "" { return color }
-	if coverageNumber >= float64(greenThreshold) { return "brightgreen" }
-	if coverageNumber >= float64(yellowThreshold) { return "yellow" }
+	if color != "" {
+		return color
+	}
+	if coverageNumber >= float64(greenThreshold) {
+		return "brightgreen"
+	}
+	if coverageNumber >= float64(yellowThreshold) {
+		return "yellow"
+	}
 	return "red"
 }
 
@@ -84,7 +99,6 @@ func retrieveTotalCoverage(filename string) (string, error) {
 		return "", err
 	}
 	defer file.Close()
-
 
 	// split content by words and grab the last one (total percentage)
 	b, err := ioutil.ReadAll(file)
@@ -98,7 +112,7 @@ func retrieveTotalCoverage(filename string) (string, error) {
 	return last, nil
 }
 
-func updateReadme(target string, coverage string, label string, color string) error {
+func updateReadme(target string, coverage string, label string, color string, link string) error {
 	found := false
 	encodedLabel := url.QueryEscape(label)
 	encodedCoverage := url.QueryEscape(coverage)
@@ -110,10 +124,14 @@ func updateReadme(target string, coverage string, label string, color string) er
 	}
 
 	lines := strings.Split(string(input), "\n")
+
 	newLine := "![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")"
+	if link != "" {
+		newLine = "[![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")](" + link + ")"
+	}
 
 	for i, line := range lines {
-		if strings.Contains(line, "![" + label + "](https://img.shields.io/badge/" + encodedLabel) {
+		if strings.Contains(line, "!["+label+"](https://img.shields.io/badge/"+encodedLabel) {
 			found = true
 			lines[i] = newLine
 		}
