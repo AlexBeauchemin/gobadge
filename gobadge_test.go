@@ -38,27 +38,27 @@ func TestGenerateBadge(t *testing.T) {
 	// Create a badge and use value from the output file as coverage
 	createFile("test.md", "## Header\nDescription...\n")
 	createFile("test.txt", "github.com/AlexBeauchemin/go-coverage-badge/gobadge.go:53:	updateReadme\n80.0%total:                                                          (statements)            33.3%")
-	err = generateBadge("test.txt", "test.md", &Params{"Coverage", Threshold{50, 70}, "", ""})
+	err = generateBadge("test.txt", "test.md", &Params{"Coverage", Threshold{50, 70}, "", "", ""})
 	assert.Equal(t, nil, err)
 	validateFileContent(t, "test.md", "## Header\n![Coverage](https://img.shields.io/badge/Coverage-33.3%25-red)\nDescription...\n")
 
 	// Create a badge and use the provided value as coverage
 	createFile("test.md", "## Header\nDescription...\n")
-	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "", "55%"})
+	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "", "55%", ""})
 	assert.Equal(t, nil, err)
 	validateFileContent(t, "test.md", "## Header\n![Coverage](https://img.shields.io/badge/Coverage-55%25-yellow)\nDescription...\n")
 
 	// Update the badge if it already exists
-	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "green", "56%"})
+	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "green", "56%", ""})
 	assert.Equal(t, nil, err)
 	validateFileContent(t, "test.md", "## Header\n![Coverage](https://img.shields.io/badge/Coverage-56%25-green)\nDescription...\n")
 
 	// error if invalid source file
-	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "", ""})
+	err = generateBadge("unknown.out", "test.md", &Params{"Coverage", Threshold{50, 70}, "", "", ""})
 	assert.Error(t, err)
 
 	// error if invalid target file
-	err = generateBadge("coverage.out", "unknown.md", &Params{"Coverage", Threshold{50, 70}, "", ""})
+	err = generateBadge("coverage.out", "unknown.md", &Params{"Coverage", Threshold{50, 70}, "", "", ""})
 	assert.Error(t, err)
 }
 
@@ -92,11 +92,17 @@ func TestUpdateReadme(t *testing.T) {
 	target := "test.md"
 
 	createFile(target, "## A Title\nA description\n")
-	err = updateReadme(target, "50.01%", "Coverage", "green")
+	err = updateReadme(target, "50.01%", "Coverage", "green", "")
 	validateFileContent(t, target, "## A Title\n![Coverage](https://img.shields.io/badge/Coverage-50.01%25-green)\nA description\n")
 	assert.Equal(t, nil, err)
 	deleteFile(target)
 
-	err = updateReadme("unknown.md", "50.01%", "Coverage", "green")
+	createFile(target, "## A Title\nA description\n")
+	err = updateReadme(target, "50.01%", "Coverage", "green", "https://www.cnn.com")
+	validateFileContent(t, target, "## A Title\n[![Coverage](https://img.shields.io/badge/Coverage-50.01%25-green)](https://www.cnn.com)\nA description\n")
+	assert.Equal(t, nil, err)
+	deleteFile(target)
+
+	err = updateReadme("unknown.md", "50.01%", "Coverage", "green", "")
 	assert.Equal(t, "open unknown.md: no such file or directory", err.Error())
 }

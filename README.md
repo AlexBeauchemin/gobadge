@@ -38,6 +38,7 @@ gobadge -filename=coverage.out
 |green                         |70        |At what percentage the badge becomes green instead of yellow|
 |color                         |          |Force a color for the badge|
 |target                        |README.md |Where to insert the badge|
+|link                          |          |Optional URL when you click the badge|
 
 ## Examples
 ```
@@ -45,6 +46,7 @@ gobadge -filename=coverage.out
 gobadge -label="Go Coverage" -value=55.6% -color=blue -target=OTHER_README.md
 gobadge -yellow=60 -green=80
 gobadge -color=ff69b4
+gobadge -link=https://github.com/project/repo/actions/workflows/test.yml
 ```
 
 ## TODO
