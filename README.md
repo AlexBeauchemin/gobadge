@@ -9,6 +9,7 @@ Using [https://shields.io](https://shields.io), the executable will generate a c
 Install the executable
 ```
 go get github.com/AlexBeauchemin/gobadge
+go install github.com/AlexBeauchemin/gobadge
 ```
 Make sure you generate a coverage file with your total coverage, something like
 ```go
