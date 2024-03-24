@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -78,7 +79,7 @@ func generateBadge(source string, target string, params *Params) error {
 }
 
 func setColor(coverage string, yellowThreshold int, greenThreshold int, color string) string {
-	coverageNumber, _ := strconv.ParseFloat(strings.Replace(coverage, "%", "", 1), 4)
+	coverageNumber, _ := strconv.ParseFloat(strings.Replace(coverage, "%", "", 1), 64)
 	if color != "" {
 		return color
 	}
@@ -101,7 +102,7 @@ func retrieveTotalCoverage(filename string) (string, error) {
 	defer file.Close()
 
 	// split content by words and grab the last one (total percentage)
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		fmt.Println("\033[1;31mGoBadge: Error while reading the coverage file\033[0m")
 		return "", err
@@ -113,39 +114,54 @@ func retrieveTotalCoverage(filename string) (string, error) {
 }
 
 func updateReadme(target string, coverage string, label string, color string, link string) error {
-	found := false
 	encodedLabel := url.QueryEscape(label)
 	encodedCoverage := url.QueryEscape(coverage)
 
-	input, err := ioutil.ReadFile(target)
+	input, err := os.ReadFile(target)
 	if err != nil {
 		fmt.Println("\033[1;31mGoBadge: Error while reading the target file\033[0m")
 		return err
 	}
 
-	lines := strings.Split(string(input), "\n")
+	// Possible regex exprs with and without link
+	// Playground: https://goplay.tools/snippet/GWvkx43QndT
+	badgeRegexes := []*regexp.Regexp{
+		regexp.MustCompile(`!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)`), 
+		regexp.MustCompile(`\[!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)\]\((.*)\)`),
+	}
+	// badgeRegex := regexp.MustCompile(`!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)`)
+	// if link != "" {
+	// 	badgeRegex = regexp.MustCompile(`\[!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)\]\((.*)\)`)
+	// }
 
-	newLine := "![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")"
+	newBadge := "![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")"
 	if link != "" {
-		newLine = "[![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")](" + link + ")"
+		newBadge = "[![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")](" + link + ")"
 	}
 
-	for i, line := range lines {
-		if strings.Contains(line, "!["+label+"](https://img.shields.io/badge/"+encodedLabel) {
+	// Check if badge is already in README. If matches, replace it with new badge
+	var output string
+	var found = false
+	for _, re := range badgeRegexes {
+		if re.MatchString(string(input)) {
+			output = re.ReplaceAllString(string(input), newBadge)
 			found = true
-			lines[i] = newLine
+			goto outside
 		}
 	}
 
+outside:
+	// If no matches found for regex exprs, it means there is no badge in README
 	// If badge not found, insert the badge on line 2 (right after the title)
-	if found == false {
+	if !found {
+		lines := strings.Split(string(input), "\n")
 		lines = append(lines, "")
 		copy(lines[2:], lines[1:])
-		lines[1] = newLine
+		lines[1] = newBadge
+		output = strings.Join(lines, "\n")
 	}
 
-	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(target, []byte(output), 0644)
+	err = os.WriteFile(target, []byte(output), 0644)
 	if err != nil {
 		fmt.Println("\033[1;31mGoBadge: Error while updating the target file\033[0m")
 		return err
