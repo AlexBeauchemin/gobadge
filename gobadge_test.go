@@ -103,6 +103,20 @@ func TestUpdateReadme(t *testing.T) {
 	assert.Equal(t, nil, err)
 	deleteFile(target)
 
+	// Test updating badge with link to badge without link
+	createFile(target, "## A Title\nA description\nContent [![Coverage](https://img.shields.io/badge/Coverage-50.01%25-green)](https://www.cnn.com)")
+	err = updateReadme(target, "40.01%", "Coverage", "green", "")
+	validateFileContent(t, target, "## A Title\nA description\nContent ![Coverage](https://img.shields.io/badge/Coverage-40.01%25-green)")
+	assert.Equal(t, nil, err)
+	deleteFile(target)
+
+	// Test updating badge without link to badge with link
+	createFile(target, "## A Title\nA description\nContent ![Coverage](https://img.shields.io/badge/Coverage-50.01%25-green)")
+	err = updateReadme(target, "50.01%", "Coverage", "green", "https://www.cnn.com")
+	validateFileContent(t, target, "## A Title\nA description\nContent [![Coverage](https://img.shields.io/badge/Coverage-50.01%25-green)](https://www.cnn.com)")
+	assert.Equal(t, nil, err)
+	deleteFile(target)
+
 	err = updateReadme("unknown.md", "50.01%", "Coverage", "green", "")
 	assert.Equal(t, "open unknown.md: no such file or directory", err.Error())
 }
