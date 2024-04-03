@@ -32,7 +32,7 @@ gobadge -filename=coverage.out
 |Flag                          |Default   |Description|
 |------------------------------|----------|-----------|
 |filename                      |output.out|File to scan for the coverage total|
-|test                          |Coverage  |Left-side content of the badge|
+|text                          |Coverage  |Left-side content of the badge|
 |value                         |          |Right-side content of the badge|
 |yellow                        |30        |At what percentage the badge will become yellow instead of red|
 |green                         |70        |At what percentage the badge becomes green instead of yellow|
