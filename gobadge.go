@@ -46,7 +46,6 @@ func main() {
 	}
 
 	err := generateBadge(*source, *target, params)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +67,6 @@ func generateBadge(source string, target string, params *Params) error {
 
 	badgeColor := setColor(coverage, params.threshold.yellow, params.threshold.green, params.color)
 	err = updateReadme(target, coverage, params.label, badgeColor, params.link)
-
 	if err != nil {
 		return err
 	}
@@ -127,7 +125,7 @@ func updateReadme(target string, coverage string, label string, color string, li
 	// Playground: https://goplay.tools/snippet/GWvkx43QndT
 	badgeRegexes := []*regexp.Regexp{
 		regexp.MustCompile(`\[!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)\]\((.*)\)`),
-		regexp.MustCompile(`!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)`), 
+		regexp.MustCompile(`!\[(\w+)\]\(https:\/\/img\.shields\.io\/badge\/(\w+)-([\d\.%]+)-(\w+)\)`),
 	}
 
 	newBadge := "![" + label + "](https://img.shields.io/badge/" + encodedLabel + "-" + encodedCoverage + "-" + color + ")"
@@ -137,7 +135,7 @@ func updateReadme(target string, coverage string, label string, color string, li
 
 	// Check if badge is already in README. If matches, replace it with new badge
 	var output string
-	var found = false
+	found := false
 	for _, re := range badgeRegexes {
 		if re.MatchString(string(input)) {
 			output = re.ReplaceAllString(string(input), newBadge)
@@ -146,7 +144,6 @@ func updateReadme(target string, coverage string, label string, color string, li
 		}
 	}
 
-outside:
 	// If no matches found for regex exprs, it means there is no badge in README
 	// If badge not found, insert the badge on line 2 (right after the title)
 	if !found {
