@@ -142,7 +142,7 @@ func updateReadme(target string, coverage string, label string, color string, li
 		if re.MatchString(string(input)) {
 			output = re.ReplaceAllString(string(input), newBadge)
 			found = true
-			goto outside
+			break
 		}
 	}
 
